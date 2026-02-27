@@ -1,102 +1,80 @@
-# Digital Attendance System for Hour-Based Lectures
+# Digital Attendance System (EEE227) — Weekly Structured Submission
 
-Console-based C++ capstone project for **EEE227** (HND Electrical Engineering, Level 200).
+You are right: this project should be submitted **week by week**, not as one complicated block.
 
-## Project Objective
-This application digitizes attendance management for hour-based lectures to reduce paper-based errors and support reliable reporting.
-
-## Features Implemented
-
-### 1) Student Management
-- Register students
-- View all registered students
-- Search students by index number
-
-### 2) Attendance Session Management
-- Create a lecture session with:
-  - Course code
-  - Date
-  - Start time
-  - Duration (minutes)
-- Mark attendance as:
-  - Present
-  - Absent
-  - Late
-- Update attendance records
-
-### 3) Reports and Summary
-- Display attendance list for any session
-- Display attendance summary counts (Present, Absent, Late)
-
-### 4) File Persistence (Offline First)
-- Saves students to `students.txt`
-- Saves sessions to `session_<COURSE>_<DATE>.txt`
-- Tracks session files in `sessions_index.txt`
-- Automatically loads saved data when program starts
-
-## Suggested Repository Structure
+This repository is now arranged exactly by weekly basics:
 
 ```text
-digital-attendance-system/
-│── main.cpp
-│── README.md
-│── students.txt
-│── sessions_index.txt
-│── session_EE201_YYYY_MM_DD.txt
+week1/main.cpp   -> Student class + add/view students
+week2/main.cpp   -> AttendanceSession + menu flow
+week3/main.cpp   -> Mark attendance + summary + better validation
+week4/main.cpp   -> File save/load + final refactor + full system
 ```
 
-## Build and Run (VS Code / g++)
+---
 
+## Week 1 (Basics)
+**Scope required:**
+- Create project structure
+- Implement `Student`
+- Add and view students
+
+**Run:**
 ```bash
-g++ -std=c++17 -Wall -Wextra -pedantic -o attendance main.cpp
+g++ -std=c++17 -Wall -Wextra -pedantic -o week1_app week1/main.cpp
+./week1_app
+```
+
+---
+
+## Week 2
+**Scope required:**
+- Implement `AttendanceSession`
+- Create lecture sessions
+- Build menu-driven flow
+
+**Run:**
+```bash
+g++ -std=c++17 -Wall -Wextra -pedantic -o week2_app week2/main.cpp
+./week2_app
+```
+
+---
+
+## Week 3
+**Scope required:**
+- Implement attendance marking
+- Add update/list/summary attendance options
+- Improve input validation
+
+**Run:**
+```bash
+g++ -std=c++17 -Wall -Wextra -pedantic -o week3_app week3/main.cpp
+./week3_app
+```
+
+---
+
+## Week 4 (Final)
+**Scope required:**
+- File save/load using `fstream`
+- Refactor and readability improvement
+- Final integrated menu system
+
+**Run:**
+```bash
+g++ -std=c++17 -Wall -Wextra -pedantic -o attendance week4/main.cpp
 ./attendance
 ```
 
-## Weekly Implementation Mapping
+Data files used in final week:
+- `students.txt`
+- `sessions_index.txt`
+- `session_<COURSE>_<DATE>.txt`
 
-### Week 1
-- Initial project structure
-- `Student` class (implemented as struct with clear fields)
-- Add/view/search student functions
+---
 
-### Week 2
-- `AttendanceSession` class (implemented as struct)
-- Create lecture sessions
-- Complete menu-driven program flow
-
-### Week 3
-- Attendance marking logic
-- Session reports and summary
-- Input validation improvements (numeric range checks, date/time/status validation)
-
-### Week 4
-- Save/load student and session data via text files (`fstream`)
-- Refactoring and readability updates (modular functions)
-- Final testing and documentation
-
-## Data File Format
-
-### students.txt
-Each line:
-
-```text
-indexNumber|fullName|programme
-```
-
-### session file
-Example: `session_EEE227_2026_02_24.txt`
-
-```text
-EEE227
-2026-02-24
-09:00
-120
-INDEX001|Present
-INDEX002|Late
-INDEX003|Absent
-```
-
-## Notes
-- Program is designed for offline use on Windows-compatible console environments.
-- All core operations are available through the main menu.
-- Data is auto-saved when exiting and can also be saved manually.
+## Notes for Submission
+- Commit work weekly on GitHub (minimum 3 meaningful commits per week as instructed).
+- Demonstrate each week file separately during assessment.
+- Use `week4/main.cpp` as the final capstone version.
