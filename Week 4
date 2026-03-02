@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cctype>
+#include <cstdlib>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -160,6 +161,33 @@ string buildSessionFilename(const AttendanceSession &session) {
     string date = session.date;
     replace(date.begin(), date.end(), '-', '_');
     return "session_" + code + "_" + date + ".txt";
+}
+
+string buildAttendanceListCsvFilename(const AttendanceSession &session) {
+    string code = sanitizeForFilename(toUpper(session.courseCode));
+    string date = session.date;
+    replace(date.begin(), date.end(), '-', '_');
+    return "attendance_list_" + code + "_" + date + ".csv";
+}
+
+string buildAttendanceSummaryCsvFilename(const AttendanceSession &session) {
+    string code = sanitizeForFilename(toUpper(session.courseCode));
+    string date = session.date;
+    replace(date.begin(), date.end(), '-', '_');
+    return "attendance_summary_" + code + "_" + date + ".csv";
+}
+
+bool openFileInSpreadsheet(const string &filename) {
+#ifdef _WIN32
+    string command = "cmd /c start \"\" \"" + filename + "\"";
+#elif __APPLE__
+    string command = "open \"" + filename + "\" >/dev/null 2>&1";
+#else
+    string command = "xdg-open \"" + filename + "\" >/dev/null 2>&1";
+#endif
+
+    int result = system(command.c_str());
+    return result == 0;
 }
 
 bool studentExists(const vector<Student> &students, const string &indexNumber) {
@@ -506,6 +534,66 @@ void updateAttendanceRecord(vector<AttendanceSession> &sessions, const vector<St
     cout << "Attendance updated successfully.\n";
 }
 
+void exportAttendanceListToCsv(const AttendanceSession &session, const vector<Student> &students) {
+    string filename = buildAttendanceListCsvFilename(session);
+    ofstream outFile(filename);
+    if (!outFile) {
+        cerr << "Warning: Could not write attendance list CSV: " << filename << "\n";
+        return;
+    }
+
+    outFile << "Course Code,Date,Start Time,Index Number,Name,Status\n";
+    for (const AttendanceRecord &record : session.records) {
+        string name = "Unknown Student";
+        for (const Student &student : students) {
+            if (student.indexNumber == record.studentIndex) {
+                name = student.fullName;
+                break;
+            }
+        }
+
+        outFile << session.courseCode << "," << session.date << "," << session.startTime << ","
+                << record.studentIndex << "," << name << "," << record.status << "\n";
+    }
+
+    cout << "Attendance list exported to: " << filename << "\n";
+    if (!openFileInSpreadsheet(filename)) {
+        cout << "Could not auto-open CSV. Please open it manually from project folder.\n";
+    }
+}
+
+void exportAttendanceSummaryToCsv(const AttendanceSession &session) {
+    string filename = buildAttendanceSummaryCsvFilename(session);
+    ofstream outFile(filename);
+    if (!outFile) {
+        cerr << "Warning: Could not write attendance summary CSV: " << filename << "\n";
+        return;
+    }
+
+    int presentCount = 0;
+    int absentCount = 0;
+    int lateCount = 0;
+
+    for (const AttendanceRecord &record : session.records) {
+        if (record.status == "Present") {
+            ++presentCount;
+        } else if (record.status == "Absent") {
+            ++absentCount;
+        } else if (record.status == "Late") {
+            ++lateCount;
+        }
+    }
+
+    outFile << "Course Code,Date,Present,Absent,Late,Total Marked\n";
+    outFile << session.courseCode << "," << session.date << "," << presentCount << ","
+            << absentCount << "," << lateCount << "," << session.records.size() << "\n";
+
+    cout << "Attendance summary exported to: " << filename << "\n";
+    if (!openFileInSpreadsheet(filename)) {
+        cout << "Could not auto-open CSV. Please open it manually from project folder.\n";
+    }
+}
+
 void displayAttendanceListForSession(const vector<AttendanceSession> &sessions, const vector<Student> &students) {
     cout << "\n--- Attendance List ---\n";
 
@@ -536,6 +624,8 @@ void displayAttendanceListForSession(const vector<AttendanceSession> &sessions, 
 
         cout << left << setw(15) << record.studentIndex << setw(35) << name << record.status << "\n";
     }
+
+    exportAttendanceListToCsv(session, students);
 }
 
 void displayAttendanceSummary(const vector<AttendanceSession> &sessions) {
@@ -566,6 +656,8 @@ void displayAttendanceSummary(const vector<AttendanceSession> &sessions) {
     cout << "Absent : " << absentCount << "\n";
     cout << "Late   : " << lateCount << "\n";
     cout << "Total Marked: " << session.records.size() << "\n";
+
+    exportAttendanceSummaryToCsv(session);
 }
 
 void saveAllData(const vector<Student> &students, const vector<AttendanceSession> &sessions) {
